@@ -1,52 +1,35 @@
 const { MongoClient } = require('mongodb')
 
 // Connection URL
-const url = 'mongodb://localhost:27017'
+const url = 'mongodb+srv://himself65:btUKsPmErEm0MyAv@cluster0.stwlj.mongodb.net'
 const client = new MongoClient(url)
 
 // Database Name
-const dbName = 'myProject'
+const dbName = 'sample_airbnb'
 
 async function main () {
-    // Use connect method to connect to the server
-    await client.connect()
-    console.log('Connected successfully to server')
-    const db = client.db(dbName)
-    await db.dropCollection('documents')
-    const collection = db.collection('documents')
+  // Use connect method to connect to the server
+  await client.connect()
+  console.log('Connected successfully to server')
+  const db = client.db(dbName)
+  const collection = db.collection('listingsAndReviews')
+  console.log('size of documents', await collection.countDocuments())
 
-    await collection.insertOne({
-        username: 'zeyuyang'
-    })
-    // you can insert a document (row) with different properties.
-    await collection.insertOne({
-        username: 'chichanglin',
-        age: 21
-    })
+  const result = await collection.find({
+    bedrooms: 1,
+    beds: {
+      $lt: 2
+    }
+  }).toArray()
+  console.log('result', result.length)
 
-    const result = await collection.findOne({
-        username: 'zeyuyang'
-    })
-    console.log('result:', result)
-    // result: { _id: new ObjectId("6386b6a9928fd8b3c2a1ef36"), username: 'zeyuyang' }
+  const result2 = await collection.find({
+    amenities: {
+      $in: ["Dishwasher"]
+    }
+  }).toArray()
 
-    await collection.findOneAndUpdate({
-        username: 'zeyuyang'
-    }, {
-        $set: {
-            age: 21
-        }
-    })
-
-    const result2 = await collection.findOne({
-        username: 'zeyuyang'
-    })
-    console.log('result2:', result2)
-    // result2: {
-    //   _id: new ObjectId("6386b7826e9ce2b29846c95a"),
-    //   username: 'zeyuyang',
-    //   age: 21
-    // }
+  console.log('result2', result2.length)
 }
 
 main().then().finally(() => client.close())
